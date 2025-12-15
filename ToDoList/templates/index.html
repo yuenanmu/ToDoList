@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办事项打卡</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tasks"></i> 待办事项打卡</h1>
+            <p class="subtitle">记录你的每日任务，完成打卡</p>
+        </header>
+
+        <div class="add-todo">
+            <form action="/add" method="POST" class="todo-form">
+                <input type="text" name="title" placeholder="添加新的待办事项..." required>
+                <button type="submit" class="add-btn">
+                    <i class="fas fa-plus"></i> 添加
+                </button>
+            </form>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>总计</h3>
+                <p>{{ todos|length }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>已完成</h3>
+                <p>{{ todos|selectattr('completed')|list|length }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>未完成</h3>
+                <p>{{ todos|rejectattr('completed')|list|length }}</p>
+            </div>
+       </div>
+        <!-- <div class="stats">
+            <div class="stat-card">
+                <h3>总计</h3>
+                <p>{{ todos|length }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>已完成</h3>
+                <p>
+                    {% set completed_count = 0 %}
+                    {% for todo in todos if todo.completed %}
+                        {% set completed_count = completed_count + 1 %}
+                    {% endfor %}
+                    {{ completed_count }}
+                </p>
+            </div>
+            <div class="stat-card">
+                <h3>未完成</h3>
+                <p>
+                    {% set uncompleted_count = 0 %}
+                    {% for todo in todos if not todo.completed %}
+                        {% set uncompleted_count = uncompleted_count + 1 %}
+                    {% endfor %}
+                    {{ uncompleted_count }}
+                </p>
+            </div>
+        </div> --> 
+
+        <div class="todo-list">
+            {% if todos %}
+                {% for todo in todos %}
+                    <div class="todo-item {% if todo.completed %}completed{% endif %}">
+                        <div class="todo-content">
+                            <div class="todo-title">
+                                <span class="todo-number">#{{ todo.id }}</span>
+                                {{ todo.title }}
+                            </div>
+                            <div class="todo-meta">
+                                <small>创建: {{ todo.created_at }}</small>
+                                {% if todo.completed_at %}
+                                <small>完成: {{ todo.completed_at }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="todo-actions">
+                            {% if todo.completed %}
+                                <a href="/uncomplete/{{ todo.id }}" class="btn uncomplete-btn">
+                                    <i class="fas fa-undo"></i> 恢复
+                                </a>
+                            {% else %}
+                                <a href="/complete/{{ todo.id }}" class="btn complete-btn">
+                                    <i class="fas fa-check"></i> 完成
+                                </a>
+                            {% endif %}
+                            <a href="/delete/{{ todo.id }}" class="btn delete-btn" 
+                               onclick="return confirm('确定删除这个待办事项吗？')">
+                                <i class="fas fa-trash"></i> 删除
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list fa-3x"></i>
+                    <h3>暂无待办事项</h3>
+                    <p>添加你的第一个任务吧！</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <footer>//第二次修改
+        <p>今日已完成: {{ today_completed }} 项任务</p>
+        </footer>
+    </div>
+
+    <script>
+        // 简单的页面刷新和确认
+        setTimeout(() => {
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (this.classList.contains('delete-btn')) {
+                        if (!confirm('确定要删除这个任务吗？')) {
+                            e.preventDefault();
+                        }
+                    }
+                });
+            });
+        }, 100);
+    </script>
+</body>
+</html>
